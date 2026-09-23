@@ -1,3 +1,1 @@
-build/preview.html
-build/preview-*.png
-node_modules/
+build/__pycache__/

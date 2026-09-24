@@ -298,12 +298,12 @@ def glass(g, x, y, w, h, rx=20, strong=False):
           f'<path d="M{x + rx} {y + .5}H{x + w - rx}" stroke="rgba(255,255,255,.28)"/>')
 
 
-def screen(g, file, x, y, w, h, rx=14, img_w=1000):
+def screen(g, file, x, y, w, h, rx=14, img_w=1000, align='xMidYMin'):
     cid, fid = g.uid('c'), g.uid('f')
     g.defs.append(f'<clipPath id="{cid}"><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}"/></clipPath>'
                   f'<filter id="{fid}" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="22" stdDeviation="24" flood-color="#000" flood-opacity=".55"/></filter>')
     g.add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="{rx}" fill="{DEEP3}" filter="url(#{fid})"/>'
-          f'<image x="{x}" y="{y}" width="{w}" height="{h}" preserveAspectRatio="xMidYMin slice" href="{jpeg(file, img_w)}" clip-path="url(#{cid})"/>'
+          f'<image x="{x}" y="{y}" width="{w}" height="{h}" preserveAspectRatio="{align} slice" href="{jpeg(file, img_w)}" clip-path="url(#{cid})"/>'
           f'<rect x="{x + .5}" y="{y + .5}" width="{w - 1}" height="{h - 1}" rx="{rx - .5}" fill="none" stroke="{GLASS_LINE2}"/>')
 
 

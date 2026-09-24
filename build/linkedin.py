@@ -49,6 +49,32 @@ def banner():
     return g.render()
 
 
+def github_thumb():
+    """The Featured card for GitHub: LinkedIn would otherwise show the avatar."""
+    TW, TH = 1200, 627
+    g = Svg(TW, TH, 'GitHub: the code behind the work')
+    pg, ig, pat, mg, mk = (g.uid('g') for _ in range(5))
+    g.defs.append(
+        f'<radialGradient id="{pg}" cx=".12" cy=".3" r=".6"><stop offset="0" stop-color="{PINK}" stop-opacity=".2"/><stop offset="1" stop-color="{PINK}" stop-opacity="0"/></radialGradient>'
+        f'<radialGradient id="{ig}" cx=".85" cy=".8" r=".55"><stop offset="0" stop-color="rgb({INDIGO})" stop-opacity=".16"/><stop offset="1" stop-color="rgb({INDIGO})" stop-opacity="0"/></radialGradient>'
+        + truntum(pat, PINK, 1.35) +
+        f'<linearGradient id="{mg}" x1="0" y1="0" x2="1" y2="0"><stop offset=".35" stop-color="#fff" stop-opacity="0"/><stop offset=".7" stop-color="#fff" stop-opacity="1"/></linearGradient>'
+        f'<mask id="{mk}"><rect width="{TW}" height="{TH}" fill="url(#{mg})"/></mask>')
+    g.add(f'<rect width="{TW}" height="{TH}" fill="{DEEP}"/><rect width="{TW}" height="{TH}" fill="url(#{pg})"/>'
+          f'<rect width="{TW}" height="{TH}" fill="url(#{ig})"/>'
+          f'<rect width="{TW}" height="{TH}" fill="url(#{pat})" opacity=".34" mask="url(#{mk})"/>')
+    # the whole README frame, inside the card: nothing runs off an edge
+    screen(g, 'readme-1.jpg', 590, 110, 540, 405, rx=14, img_w=1100, align='xMinYMin')
+    x = 80
+    g.add(f'<circle cx="{x + 6}" cy="112" r="6" fill="{PINK}"/>')
+    g.t(x + 24, 119, 'GITHUB  /  NABNABILAA', 'M', 17, ON2, ls=3.2, weight=500)
+    g.t(x - 3, 250, 'The code', 'F', 84, ON, ls=-2, weight=380)
+    g.t(x - 3, 338, 'behind', 'F', 84, ON, ls=-2, weight=380)
+    g.t(x - 3, 426, 'the work.', 'FI', 84, PINK, ls=-1.6, weight=380)
+    g.t(x, 540, 'github.com/nabnabilaa', 'M', 18, ON3, ls=1)
+    return g.render(), TW, TH
+
+
 async def render(svg_path):
     from playwright.async_api import async_playwright
     async with async_playwright() as p:
@@ -67,4 +93,17 @@ if __name__ == '__main__':
     svg = OUT / 'banner.svg'
     svg.write_text(banner(), encoding='utf-8')
     asyncio.run(render(svg))
+    thumb, tw, th = github_thumb()
+    (OUT / 'github-thumb.svg').write_text(thumb, encoding='utf-8')
+
+    async def shoot():
+        from playwright.async_api import async_playwright
+        async with async_playwright() as p:
+            b = await p.chromium.launch()
+            page = await b.new_page(viewport={'width': tw, 'height': th})
+            await page.goto((OUT / 'github-thumb.svg').as_uri())
+            await page.wait_for_timeout(800)
+            await page.screenshot(path=str(OUT / 'github-thumb.png'))
+            await b.close()
+    asyncio.run(shoot())
     print('written', *sorted(p.name for p in OUT.iterdir()))
